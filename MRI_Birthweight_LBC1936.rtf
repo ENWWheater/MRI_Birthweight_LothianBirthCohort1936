@@ -1,0 +1,442 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2513
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww21940\viewh10100\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 #LBC Code\
+\
+###R - linear regressions of whole brain volumes and white matter microstructure###\
+\
+library(lavaan)\
+library(lm.beta)\
+library(foreign)\
+\
+#data\
+data <- read.spss(\'91data.sav\'92, to.data.frame = T)\
+data <- subset(data, dat$agedays_w2 != \'91NA\'92)\
+\
+#Deriving of gFA\
+#Confirmatory factor analysis (cfa in lavaan)\
+\
+model = \'91\
+gFA =~ a + b + c + d + e + f + g + h + i + j + k + l \
+\
+#residual correlations\
+\
+a ~~ b\
+c ~~ d\
+e ~~ f\
+g~~ h\
+i ~~ j\
+k ~~ l\
+\
+\'91\
+\
+Tmp <- data.frame(a = data$Splenium_FA_w2, b = data$Genu_FA_w2, c = data$LArc_FA_w2, d = data$RArc_FA_w2, e = data$LATR_FA_w2, f = data$RATR_FA_w2, g = data$LCing_FA_w2, h = data$RCing_FA_w2, i = data$LUnc_FA_w2, j = data$RUnc_FA_w2, k = data$LILF_FA_w2, l = data$RILF_FA_w2)\
+\
+fit <- cfa(model, data = tmp, missing = \'93fiml\'94)\
+\
+summary(fit, fit.measures = T, standardized = T)\
+\
+FactorScores <- predict(fit, tmp)\
+\
+data <- cbind(data, FactorScores)\
+\
+\
+\
+#Linear regressions\
+\
+###Experiment 1a: controlling for age and sex\
+\
+TBV_1a <- lm(data$brain_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(TBV_1a)\
+lm.beta(TBV_1a)\
+\
+WM_1a <- lm(data$wm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(WM_1a)\
+lm.beta(WM_1a)\
+\
+GM_1a <- lm(data$gm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(GM_1a)\
+lm.beta(GM_1a)\
+\
+WMH_1a <- lm(log1p(data$wmh_mm3_w2) ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(WMH_1a)\
+lm.beta(WMH_1a)\
+\
+PSMD_1a <- lm(data$MRI_psmd_spread_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(PSMD_1a)\
+lm.beta(PSMD_1a)\
+\
+gFA_1a <- lm(data$gFA ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(gFA_1a)\
+lm.beta(gFA_1a)\
+\
+FDR p values\
+#\
+p.adjust(c(), method = \'93fdr\'92)\
+\
+#\
+\
+###Experiment 1b: controlling for age, sex, height and weight\
+\
+\
+TBV_1b <- lm(data$brain_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$height_w2 + data$weight_w2)\
+summary(TBV_1b)\
+lm.beta(TBV_1b)\
+\
+WM_1b <- lm(data$wm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$height_w2 + data$weight_w2)\
+summary(WM_1b)\
+lm.beta(WM_1b)\
+\
+GM_1b <- lm(data$gm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$height_w2 + data$weight_w2)\
+summary(GM_1b)\
+lm.beta(GM_1b)\
+\
+WMH_1b <- lm(log1p(data$wmh_mm3_w2) ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$height_w2 + data$weight_w2)\
+summary(WMH_1b)\
+lm.beta(WMH_1b)\
+\
+PSMD_1b <- lm(data$MRI_psmd_spread_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$height_w2 + data$weight_w2)\
+summary(PSMD_1b)\
+lm.beta(PSMD_1b)\
+\
+gFA_1b <- lm(data$gFA ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$height_w2 + data$weight_w2)\
+summary(gFA_1b)\
+lm.beta(gFA_1b)\
+\
+FDR p values\
+#\
+p.adjust(c(), method = \'93fdr\'92)\
+\
+###Experiment 2a: adjusting for sex, age and ICV\
+\
+\
+TBV_2a <- lm(data$brain_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX)\
+summary(TBV_2a)\
+lm.beta(TBV_2a)\
+\
+WM_2a <- lm(data$wm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX)\
+summary(WM_2a)\
+lm.beta(WM_2a)\
+\
+GM_2a <- lm(data$gm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX)\
+summary(GM_2a)\
+lm.beta(GM_2a)\
+\
+WMH_2a <- lm(log1p(data$wmh_mm3_w2) ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX)\
+summary(WMH_2a)\
+lm.beta(WMH_2a)\
+\
+PSMD_2a <- lm(data$MRI_psmd_spread_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX)\
+summary(PSMD_2a)\
+lm.beta(PSMD_2a)\
+\
+gFA_2a <- lm(data$gFA ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX)\
+summary(gFA_2a)\
+lm.beta(gFA_2a)\
+\
+FDR p values\
+#\
+p.adjust(c(), method = \'93fdr\'92)\
+\
+###Experiment 2b: adjusting for sex, age, ICV, height, weight\
+\
+TBV_2b <- lm(data$brain_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX + data$height_w2 + data$weight_w2)\
+summary(TBV_2b)\
+lm.beta(TBV_2b)\
+\
+WM_2b <- lm(data$wm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX + data$height_w2 + data$weight_w2)\
+summary(WM_2b)\
+lm.beta(WM_2b)\
+\
+GM_2b <- lm(data$gm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX + data$height_w2 + data$weight_w2)\
+summary(GM_2b)\
+lm.beta(GM_2b)\
+\
+WMH_2b <- lm(log1p(data$wmh_mm3_w2) ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX + data$height_w2 + data$weight_w2)\
+summary(WMH_2b)\
+lm.beta(WMH_2b)\
+\
+PSMD_2b <- lm(data$MRI_psmd_spread_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX + data$height_w2 + data$weight_w2)\
+summary(PSMD_2b)\
+lm.beta(PSMD_2b)\
+\
+gFA_2b <- lm(data$gFA ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$ICV_mm3_wX + data$height_w2 + data$weight_w2)\
+summary(gFA_2b)\
+lm.beta(gFA_2b)\
+\
+FDR p values\
+#\
+p.adjust(c(), method = \'93fdr\'92)\
+\
+\
+###Supplementary analyses###\
+#ICV ratio\
+TBV_ICVrat <- lm(data$brainICV_ratio_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(TBV_ICVrat)\
+lm.beta(TBV_ICVrat)\
+\
+WM_ICVrat <- lm(data$wmICV_ratio_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(WM_ICVrat)\
+lm.beta(WM_ICVrat)\
+\
+GM_ICVrat <- lm(data$gmICV_ratio_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(GM_ICVrat)\
+lm.beta(GM_ICVrat)\
+\
+WMH_ICVrat <- lm(log1p(data$wmhICV_ratio_w2) ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex))\
+summary(WMH_ICVrat)\
+lm.beta(WMH_ICVrat)\
+\
+FDR p values\
+#\
+p.adjust(c(), method = \'93fdr\'92)\
+\
+#Cardiovascular\
+TBV_cvd <- lm(data$brain_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2))\
+summary(TBV_1a)\
+lm.beta(TBV_1a)\
+\
+WM_cvd <- lm(data$wm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2))\
+summary(WM_1a)\
+lm.beta(WM_1a)\
+\
+GM_cvd <- lm(data$gm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2))\
+summary(GM_1a)\
+lm.beta(GM_1a)\
+\
+WMH_cvd <- lm(log1p(data$wmh_mm3_w2) ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2))\
+summary(WMH_1a)\
+lm.beta(WMH_1a)\
+\
+PSMD_cvd <- lm(data$MRI_psmd_spread_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2))\
+summary(PSMD_1a)\
+lm.beta(PSMD_1a)\
+\
+gFA_cvd <- lm(data$gFA ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2))\
+summary(gFA_1a)\
+lm.beta(gFA_1a)\
+\
+FDR p values\
+#\
+p.adjust(c(), method = \'93fdr\'92)\
+\
+#sensitivity analysis with stroke\
+TBV_cvd <- lm(data$brain_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2) + as.factor(data$stroke_w2))\
+summary(TBV_1a)\
+lm.beta(TBV_1a)\
+\
+WM_cvd <- lm(data$wm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2) + as.factor(data$stroke_w2))\
+summary(WM_1a)\
+lm.beta(WM_1a)\
+\
+GM_cvd <- lm(data$gm_mm3_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2) + as.factor(data$stroke_w2))\
+summary(GM_1a)\
+lm.beta(GM_1a)\
+\
+WMH_cvd <- lm(log1p(data$wmh_mm3_w2) ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2) + as.factor(data$stroke_w2))\
+summary(WMH_1a)\
+lm.beta(WMH_1a)\
+\
+PSMD_cvd <- lm(data$MRI_psmd_spread_w2 ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2) + as.factor(data$stroke_w2))\
+summary(PSMD_1a)\
+lm.beta(PSMD_1a)\
+\
+gFA_cvd <- lm(data$gFA ~ data$BW_Birth_weight_G + data$ageMRI_w2 + as.factor(data$sex) + data$bmi_w2 + data$hichol_w2 + data$hibp+w2 + data$diab_w2 + as.factor(data$cvd_w2) +as.factor(data$smokcurr_w2) + as.factor(data$stroke_w2))\
+summary(gFA_1a)\
+lm.beta(gFA_1a)\
+\
+FDR p values\
+#\
+p.adjust(c(), method = \'93fdr\'92)\
+\
+#####Matlab code for regional cortical analysis%%%%%\
+\
+#SurfStat \
+\
+%%%\
+%add surfstat to path\
+addpath('/surfstat')\
+\
+\
+%%% Freesurfer average surface \
+avsurf = SurfStatReadSurf( \{ \'91/fsaverage/surf/lh.pial'...\
+                           '/fsaverage/surf/rh.pial' \});\
+\
+\
+% READ IN FULL DATA\
+[ID Age Sex BW ICV Brain Height Weight AreaLeft AreaRight]=textread('/CCACE_Shared/emily/AREA/anthro.txt','%s %f %f %f %f %f %f %f %s %s');\
+\
+\
+\
+mask = SurfStatROI([0;24;5],11, avsurf) == 0 & SurfStatROI([0;-29;10],18, avsurf) == 0 & SurfStatROI([0;-12;2],29, avsurf) == 0 & SurfStatROI([0;-1;15],16, avsurf) == 0 & SurfStatROI([0;11;9],16, avsurf) == 0 & SurfStatROI([0;12;-1],12, avsurf) == 0;\
+\
+\
+%Create Terms \
+ID = term (ID);\
+Age = term(Age);\
+Sex = term(Sex);\
+BW = term (BW);\
+ICV = term(ICV);\
+Brain = term(Brain);\
+Height = term(Height);\
+Weight = term(Weight);\
+\
+%Cat = term(cat);\
+\
+%Volume\
+Vol = SurfStatReadData ([VolLeft VolRight]);\
+SurfStatView( mask, avsurf, 'Masked average surface')\
+\
+\
+% BW adj for Sex and Age\
+M = 1 + BW + Age + Sex;\
+slm=SurfStatLinMod(Vol, M, avsurf);\
+slm2=SurfStatT(slm, BW);\
+SurfStatView(slm2.t.*mask, avsurf, 'BW on Volume');\
+qval = SurfStatQ(slm2, mask);\
+SurfStatView(qval, avsurf, 'Birthweight');\
+\
+%Thickness\
+\
+Thick =  SurfStatReadData ([ThickLeft ThickRight]);\
+SurfStatView( mask, avsurf, 'Masked average surface')\
+\
+\
+% BW adj for Sex and Age\
+M = 1 + BW + Age + Sex;\
+slm=SurfStatLinMod(Thick, M, avsurf);\
+slm2=SurfStatT(slm, BW);\
+SurfStatView(slm2.t.*mask, avsurf, 'BW on Volume');\
+qval = SurfStatQ(slm2, mask);\
+SurfStatView(qval, avsurf, 'Birthweight');\
+\
+\
+% Cortical surface area\
+\
+AREA = SurfStatReadData ([AreaLeft AreaRight]);\
+SurfStatView( mask, avsurf, 'Masked average surface')\
+\
+%Model BW adj for Sex and Age\
+M = 1 + BW + Age + Sex;\
+slm=SurfStatLinMod(AREA, M, avsurf);\
+slm2=SurfStatT(slm, BW);\
+SurfStatView(slm2.t.*mask, avsurf, 'Birthweight + sex + age');\
+SurfStatColLim([-3, 5]);\
+set(gcf,'PaperPosition',[0.25 2.5 16 12])\
+saveas(gcf, '/CCACE_Shared/emily/AREA/Figures/May/T_BW_adj.jpg')\
+\
+\
+qval = SurfStatQ(slm2, mask);\
+SurfStatView(qval, avsurf, 'Birthweight + sex + age');\
+set(gcf,'PaperPosition',[0.25 2.5 16 12])\
+saveas(gcf, '/CCACE_Shared/emily/AREA/Figures/May/Q_BW_adj.jpg')\
+\
+\
+\
+%Model BW adj for Age, Sex, Weight, Height\
+M = 1 + BW + Age + Sex + Weight + Height;\
+slm=SurfStatLinMod(AREA, M, avsurf);\
+slm3=SurfStatT(slm, BW);\
+SurfStatView(slm3.t.*mask, avsurf, 'Birthweight + sex + age + height + weight');\
+SurfStatColLim([-3, 5]);\
+set(gcf,'PaperPosition',[0.25 2.5 16 12])\
+saveas(gcf, '/CCACE_Shared/emily/AREA/Figures/May/T_BW_adj(HW).jpg')\
+\
+qval = SurfStatQ(slm3, mask);\
+SurfStatView(qval, avsurf, 'Birthweight + sex + age + height + weight');\
+set(gcf,'PaperPosition',[0.25 2.5 16 12])\
+saveas(gcf, '/CCACE_Shared/emily/AREA/Figures/May/Q_BW_adj(HW).jpg')\
+\
+\
+%Model BW adj for Age, Sex, ICV\
+M = 1 + BW + Age + Sex + ICV;\
+slm=SurfStatLinMod(AREA, M, avsurf);\
+slm4=SurfStatT(slm, BW);\
+SurfStatView(slm4.t.*mask, avsurf, 'Birthweight + sex + age + ICV');\
+SurfStatColLim([-3, 5]);\
+set(gcf,'PaperPosition',[0.25 2.5 16 12])\
+saveas(gcf, '/CCACE_Shared/emily/AREA/Figures/May/T_BW_adj(ICV).jpg')\
+\
+qval = SurfStatQ(slm4, mask);\
+SurfStatView(qval, avsurf, 'Birthweight + sex + age + ICV');\
+\
+set(gcf,'PaperPosition',[0.25 2.5 16 12])\
+saveas(gcf, '/CCACE_Shared/emily/AREA/Figures/May/Q_BW_adj(ICV).jpg')\
+\
+\
+\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+\
+% Attenuation maps\
+\
+\
+% Attenuation 1\
+% BW\
+\
+% cov = age sex height weight\
+%%%attenuation between sex and age cov and age sex height and weight cov?\
+SurfStatColormap('attenuation');\
+\
+att1 = abs((slm2.t - slm3.t)./slm2.t)*100;\
+\
+[qval] = SurfStatQ( slm2, mask );\
+\
+mask1 = (qval.Q<0.05);\
+\
+att1(mask1 == 0) = 0;\
+\
+att1(mask == 0) = 0;\
+\
+dlmwrite('/CCACE_Shared/emily/BW_att.csv', att1)\
+\
+mean(att1(att1>0))       %M = 19.2                     \
+\
+std(att1(att1>0))        %SD = 8.67                              \
+\
+max(att1(att1>0)) % Max = 52.53\
+\
+SurfStatView(att1, avsurf, 'Attenuation (%)');             \
+\
+SurfStatColLim([0, 100]);\
+\
+set(gcf,'PaperPosition',[0.25 2.5 16 12])\
+\
+saveas(gcf, 'ATT_1.jpeg')\
+\
+\
+%%%Attenuation 2\
+\
+%%%Attenuation between adj BW model and additionally adj for ICV\
+\
+att2 = abs((slm2.t - slm4.t)./slm2.t)*100; \
+\
+att2(mask1 == 0) = 0;\
+\
+att2(mask == 0) = 0;\
+\
+dlmwrite('/CCACE_Shared/emily/BW_ICV_att.csv', att2)\
+\
+mean(att2(att2>0))       %M =     48%                 \
+\
+std(att2(att2>0))        %SD =  13.82%                             \
+\
+max(att2(att2>0)) % Max = 98.43%\
+\
+SurfStatView(att2, avsurf, 'Attenuation (%)');             \
+\
+SurfStatColLim([0, 100]);\
+\
+set(gcf,'PaperPosition',[0.25 2.5 16 12])\
+\
+saveas(gcf, 'ATT_2.jpg')\
+\
+\
+\
+\
+\
+\
+}
